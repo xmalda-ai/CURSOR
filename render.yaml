@@ -1,0 +1,29 @@
+# Bezplatný web po čtvrthodině nečinnosti usne a bezplatná databáze po 30 dnech skončí.
+# Než se dotazník vyvěsí u výdeje, přepněte web na starter a databázi na plán, který neexpiruje.
+databases:
+  - name: odevy-db
+    databaseName: odevy
+    user: odevy
+    plan: free
+    region: frankfurt
+
+services:
+  - type: web
+    name: dotaznik-odevy
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: odevy-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
